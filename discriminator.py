@@ -22,18 +22,19 @@ class Discriminator:
         self.model.add(Conv2D(size*2, (3, 3), activation = 'relu'))
         self.model.add(BatchNormalization(momentum=0.9))
         self.model.add(Flatten())
-        self.model.add(Dense(1, activation='sigmoid'))
+        self.model.add(Dense(3, activation='sigmoid')) # should have been 1
 
-        return self.model.summary()
+        return self.model
 
     def compileModel(self, lossFunction, optimizer):
         return self.model.compile(loss = lossFunction, optimizer = optimizer, metrics = ['accuracy'])
 
     def train(self):
-        #self.input.reshape(1, 224, 224, 3)
-        return self.model.fit(self.input, self.output, epochs=10)
+        return self.model.fit(self.input, self.output, epochs=20)
 
+"""
 d = Discriminator('./resizedData')
 print(d.createModel(32))
 print(d.compileModel('binary_crossentropy', 'adam'))
 print(d.train())
+"""

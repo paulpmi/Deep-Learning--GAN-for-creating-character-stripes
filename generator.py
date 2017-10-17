@@ -18,23 +18,28 @@ class Generator:
         print(self.input.shape)
 
     def createModel(self, imgDim):
-        self.model.add(Conv2D(32, (3, 3), input_shape = (224, 224, 3), activation = 'relu'))
+        self.model.add(Conv2D(32, (3, 3), input_shape = (224, 224, 3), activation = 'relu')) # conv block may disturb creating process
         #self.model.add(Flatten())
         #self.model.add(Dense(imgDim**2*3))
         #self.model.add(BatchNormalization(momentum=0.9))
-        self.model.add(Activation('relu'))
+        #self.model.add(Activation('relu'))
         #self.model.add(Reshape((imgDim, imgDim, 3)))
+        self.model.add(ZeroPadding2D((1, 1)))
+        self.model.add(Conv2D(32, (3, 3), activation = 'relu')) # conv block may disturb creating process
+        self.model.add(ZeroPadding2D((1, 1)))
+        self.model.add(Conv2D(32, (3, 3), activation = 'relu')) # conv block may disturb creating process
+        self.model.add(ZeroPadding2D((1, 1)))
         self.model.add(Deconv2D(16, 5, padding='same'))
         self.model.add(BatchNormalization(momentum=0.9))
         self.model.add(Activation('relu'))
-        self.model.add(Deconv2D(8, 5, padding='same', activation='relu'))
+        self.model.add(Deconv2D(16, 5, padding='same', activation='relu'))
         self.model.add(BatchNormalization(momentum=0.9))
-        self.model.add(Deconv2D(1, 5, padding='same'))
+        self.model.add(Deconv2D(3, 5, padding='same'))
         self.model.add(Activation('sigmoid'))
         #self.model.add(Flatten())
         #self.model.add(Dense(1))
 
-        return self.model.summary()
+        return self.model
 
     def compileModel(self, lossFunction, optimizer):
         return self.model.compile(loss = lossFunction, optimizer = optimizer, metrics = ['accuracy'])
@@ -43,6 +48,9 @@ class Generator:
     def train(self):
         return self.model.predict(self.input)
 
+
+
+"""
 g = Generator()
 g.load('./resizedData')
 Z = numpy.random.rand(224,224,3)
@@ -55,3 +63,4 @@ print(g.train())
 #Z = numpy.random.uniform(-1.0, 1.0, size=[256, 100])   # Test data
 #imshow(Z, cmap=get_cmap("Spectral"), interpolation='nearest')
 #show()
+"""
