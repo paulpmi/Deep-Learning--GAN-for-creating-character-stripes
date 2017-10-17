@@ -9,11 +9,12 @@ from loading import Loader
 class Discriminator:
     def __init__(self, path):
         l = Loader(path)
-        self.input = l.load()
+        self.input, self.output = l.load()
+        print(self.input.shape)
         self.model = Sequential()
 
     def createModel(self, size):
-        self.model.add(Conv2D(size, (3, 3), input_shape = self.input.shape, activation = 'relu'))
+        self.model.add(Conv2D(size, (3, 3), input_shape = (224, 224, 3), activation = 'relu'))
         self.model.add(Conv2D(size, (3, 3), activation = 'relu'))
         self.model.add(BatchNormalization(momentum=0.9))
         self.model.add(Dropout(0.5))
@@ -28,7 +29,11 @@ class Discriminator:
     def compileModel(self, lossFunction, optimizer):
         return self.model.compile(loss = lossFunction, optimizer = optimizer, metrics = ['accuracy'])
 
+    def train(self):
+        #self.input.reshape(1, 224, 224, 3)
+        return self.model.fit(self.input, self.output, epochs=10)
 
 d = Discriminator('./resizedData')
 print(d.createModel(32))
 print(d.compileModel('binary_crossentropy', 'adam'))
+print(d.train())
