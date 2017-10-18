@@ -6,17 +6,17 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 class Adversial:
-    def __init__(self, path):
+    def __init__(self, path, g, d):
         l = Loader(path)
         self.input, self.output = l.load()
         self.model = Sequential()
-        self.generator = Generator()
-        self.generator.load(path)
-        self.discriminator = Discriminator(path)
+        self.generator = g
+        #self.generator.load(path)
+        self.discriminator = d
 
     def createModel(self, gnr, dnr):
-        self.model.add(self.generator.createModel(gnr))
-        self.model.add(self.discriminator.createModel(dnr))
+        self.model.add(self.generator.getModel())
+        self.model.add(self.discriminator.getModel())
     
         return self.model.summary()
 
@@ -34,25 +34,31 @@ class DGAN:
         #self.model = Sequential()
         self.generator = Generator()
         self.generator.load(path)
-        self.generator.createModel(32)
+        self.generator.createModel(16)
         self.generator.compileModel('binary_crossentropy', 'adam')
         
         self.discriminator = Discriminator(path)
         self.discriminator.createModel(32)
         self.discriminator.compileModel('binary_crossentropy', 'adam')
 
-        self.adversial = Adversial(path)
-        self.adversial.createModel(32, 32)
+        self.adversial = Adversial(path, self.generator, self.discriminator)
+        self.adversial.createModel(16, 32)
         self.adversial.compileModel('binary_crossentropy', 'adam')
 
     def start(self, loop):
         for looper in range(loop):
-            fakeImg = self.generator.train()
+            fakeImg = self.adversial.generator.train()
             print("FAKE")
             print(fakeImg.shape)
             print("REAL")
             print(self.input.shape)
             inputImg = np.vstack((self.input, fakeImg))
+            """
+            for i in self.input:
+                print("POWERPLANT")
+                print(i.shape)
+                inputImg = np.vstack((i, fakeImg))
+            """
             o = []
             for i in range(fakeImg.shape[0]):
                 o.append(0)
@@ -72,19 +78,34 @@ class DGAN:
             print("OUTPUT")
             print(outputImg.shape)
 
-            discriminator_loss = self.discriminator.model.train_on_batch(inputImg, outputImg)
+            for k in outputImg:
+                print("KOALAPLANT")
+                print(k.shape)
+                k = np.repeat(k,2)
+                print(k.shape)
+                discriminator_loss = self.adversial.discriminator.model.train_on_batch(inputImg, k)
             
-            fake2 = self.generator.train()
+            fake2 = self.adversial.generator.train()
             faker = np.vstack((fake2, fakeImg))
 
             forcedOutput =  np.vstack((self.output, self.output))
             for i in range(4):
                 forcedOutput = np.vstack((forcedOutput, self.output))
 
-            adversial_loss = self.adversial.model.train_on_batch(faker, forcedOutput) # should be: fakeImg, self.output
+            power = []
+            for n in range(6):
+                a = numpy.random.rand(28,28,3) * 28
+                #print(a)
+                #im_out = Image.fromarray(a.astype('uint8')).convert('RGB')
+                power.append(a)
+
+            power = np.asarray(power)           
+            for k in forcedOutput:
+                k = np.repeat(k,2)
+                adversial_loss = self.adversial.model.train_on_batch(power, k) # should be: fakeImg, self.output
 
 
-        generated = self.generator.train()
+        generated = self.adversial.generator.train()
         j = 0
         for i in generated:
             img = Image.fromarray(i, 'RGB')
@@ -92,5 +113,14 @@ class DGAN:
             img.save('my'+str(j)+'.png')
             j+=1
 
+    def start2(self):
+        for i in range(100):
+            generated = self.generator.train()
+        j = 0
+        for i in generated:
+            img = Image.fromarray(i, 'RGB')
+            print(j)
+            img.save('my'+str(j)+'.png')
+            j+=1
 algorithm = DGAN('./resizedData')
-algorithm.start(5)
+algorithm.start(10)

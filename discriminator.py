@@ -14,23 +14,27 @@ class Discriminator:
         self.model = Sequential()
 
     def createModel(self, size):
-        self.model.add(Conv2D(size, (3, 3), input_shape = (224, 224, 3), activation = 'relu'))
+        self.model.add(Conv2D(size, (3, 3), input_shape = (28, 28, 3), activation = 'relu'))
         self.model.add(Conv2D(size, (3, 3), activation = 'relu'))
         self.model.add(BatchNormalization(momentum=0.9))
         self.model.add(Dropout(0.5))
         self.model.add(Conv2D(size*2, (3, 3), activation = 'relu'))
         self.model.add(Conv2D(size*2, (3, 3), activation = 'relu'))
         self.model.add(BatchNormalization(momentum=0.9))
+        self.model.add(Dropout(0.5))
         self.model.add(Flatten())
-        self.model.add(Dense(3, activation='sigmoid')) # should have been 1
+        self.model.add(Dense(1, activation='sigmoid'))
 
         return self.model
 
     def compileModel(self, lossFunction, optimizer):
         return self.model.compile(loss = lossFunction, optimizer = optimizer, metrics = ['accuracy'])
 
+    def getModel(self):
+        return self.model
+
     def train(self):
-        return self.model.fit(self.input, self.output, epochs=20)
+        return self.model.fit(self.input, self.output, epochs=10)
 
 """
 d = Discriminator('./resizedData')

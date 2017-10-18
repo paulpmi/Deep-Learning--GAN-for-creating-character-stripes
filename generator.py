@@ -18,22 +18,42 @@ class Generator:
         print(self.input.shape)
 
     def createModel(self, imgDim):
-        self.model.add(Conv2D(32, (3, 3), input_shape = (224, 224, 3), activation = 'relu')) # conv block may disturb creating process
+        #self.model.add(Conv2D(16, (3, 3), input_shape = (224, 224, 3), activation = 'relu')) # conv block may disturb creating process
         #self.model.add(Flatten())
         #self.model.add(Dense(imgDim**2*3))
         #self.model.add(BatchNormalization(momentum=0.9))
         #self.model.add(Activation('relu'))
         #self.model.add(Reshape((imgDim, imgDim, 3)))
-        self.model.add(ZeroPadding2D((1, 1)))
-        self.model.add(Conv2D(32, (3, 3), activation = 'relu')) # conv block may disturb creating process
-        self.model.add(ZeroPadding2D((1, 1)))
-        self.model.add(Conv2D(32, (3, 3), activation = 'relu')) # conv block may disturb creating process
-        self.model.add(ZeroPadding2D((1, 1)))
-        self.model.add(Deconv2D(16, 5, padding='same'))
+        #self.model.add(ZeroPadding2D((1, 1)))
+        #self.model.add(Conv2D(32, (3, 3), activation = 'relu')) # conv block may disturb creating process
+        #self.model.add(ZeroPadding2D((1, 1)))
+        #self.model.add(Conv2D(16, (3, 3), activation = 'relu')) # conv block may disturb creating process
+        #self.model.add(ZeroPadding2D((1, 1)))
+        
+        self.model.add(Deconv2D(512, 5, padding='same', input_shape=(28, 28, 3)))
         self.model.add(BatchNormalization(momentum=0.9))
         self.model.add(Activation('relu'))
-        self.model.add(Deconv2D(16, 5, padding='same', activation='relu'))
+        self.model.add(Dropout(0.3))
+        self.model.add(Deconv2D(512, 5, padding='same'))
         self.model.add(BatchNormalization(momentum=0.9))
+        self.model.add(Activation('relu'))
+        self.model.add(Dropout(0.3))
+        self.model.add(Deconv2D(256, 5, padding='same'))
+        self.model.add(BatchNormalization(momentum=0.9))
+        self.model.add(Activation('relu'))
+        self.model.add(Dropout(0.5))
+        self.model.add(Deconv2D(256, 5, padding='same'))
+        self.model.add(BatchNormalization(momentum=0.9))
+        self.model.add(Activation('relu'))
+        self.model.add(Dropout(0.5))
+        self.model.add(Deconv2D(128, 5, padding='same'))
+        self.model.add(BatchNormalization(momentum=0.9))
+        self.model.add(Activation('relu'))
+        self.model.add(Dropout(0.5))
+        self.model.add(Deconv2D(128, 5, padding='same'))
+        self.model.add(BatchNormalization(momentum=0.9))
+        self.model.add(Activation('relu'))
+        self.model.add(Dropout(0.6))        
         self.model.add(Deconv2D(3, 5, padding='same'))
         self.model.add(Activation('sigmoid'))
         #self.model.add(Flatten())
@@ -43,6 +63,9 @@ class Generator:
 
     def compileModel(self, lossFunction, optimizer):
         return self.model.compile(loss = lossFunction, optimizer = optimizer, metrics = ['accuracy'])
+
+    def getModel(self):
+        return self.model
 
 
     def train(self):
