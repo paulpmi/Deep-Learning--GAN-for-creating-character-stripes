@@ -14,7 +14,7 @@ class Discriminator:
         self.model = Sequential()
 
     def createModel(self, size):
-        self.model.add(Conv2D(size, (3, 3), input_shape = (28, 28, 3), activation = 'relu'))
+        self.model.add(Conv2D(size, (3, 3), input_shape = (100, 100, 3), activation = 'relu'))
         self.model.add(Conv2D(size, (3, 3), activation = 'relu'))
         self.model.add(BatchNormalization(momentum=0.9))
         self.model.add(Dropout(0.5))
@@ -34,7 +34,7 @@ class Discriminator:
         return self.model
 
     def train(self):
-        return self.model.fit(self.input, self.output, epochs=10)
+        return self.model.fit(self.input, self.output, epochs=1)
 
 """
 d = Discriminator('./resizedData')

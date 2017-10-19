@@ -19,11 +19,11 @@ class Resizer:
 
 
 baseheight = 224
-for i in range(1, 4):
+for i in range(1, 9):
     img = Image.open('./data/k.' + str(i) + '.jpg').convert('RGB')
     hpercent = (baseheight / float(img.size[1]))
     wsize = int((float(img.size[0]) * float(hpercent)))
-    img = img.resize((28, 28), PIL.Image.ANTIALIAS)
+    img = img.resize((100, 100), PIL.Image.ANTIALIAS)
     img.save('./train/resized_image' + str(i) + '.jpg')
 
 import numpy as np

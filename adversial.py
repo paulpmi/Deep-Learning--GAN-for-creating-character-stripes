@@ -1,9 +1,11 @@
 from discriminator import *
 from generator import Generator
+from upscaler import *
 import numpy as np
 
 import matplotlib.pyplot as plt
 from PIL import Image
+import PIL
 
 class Adversial:
     def __init__(self, path, g, d):
@@ -25,6 +27,9 @@ class Adversial:
 
     def train(self, x, y):
         return self.model.fit(x, y, epochs=2)
+
+    def generate(self):
+        return self.generator.train()
 
 
 class DGAN:
@@ -93,7 +98,7 @@ class DGAN:
                 forcedOutput = np.vstack((forcedOutput, self.output))
 
             power = []
-            for n in range(6):
+            for n in range(4):
                 a = numpy.random.rand(28,28,3) * 28
                 #print(a)
                 #im_out = Image.fromarray(a.astype('uint8')).convert('RGB')
@@ -102,25 +107,19 @@ class DGAN:
             power = np.asarray(power)           
             for k in forcedOutput:
                 k = np.repeat(k,2)
-                adversial_loss = self.adversial.model.train_on_batch(power, k) # should be: fakeImg, self.output
+                adversial_loss = self.adversial.model.train_on_batch(inputImg, k) # should be: fakeImg, self.output
 
 
-        generated = self.adversial.generator.train()
+        generated = self.adversial.generate()
+        #uS = Upscaler(generated)
+        #generated = uS.scale()
         j = 0
         for i in generated:
             img = Image.fromarray(i, 'RGB')
+            img.resize((1280, 1024), PIL.Image.ANTIALIAS)
             print(j)
             img.save('my'+str(j)+'.png')
             j+=1
 
-    def start2(self):
-        for i in range(100):
-            generated = self.generator.train()
-        j = 0
-        for i in generated:
-            img = Image.fromarray(i, 'RGB')
-            print(j)
-            img.save('my'+str(j)+'.png')
-            j+=1
 algorithm = DGAN('./resizedData')
-algorithm.start(10)
+algorithm.start(2)
